@@ -6,6 +6,7 @@ requires-python = ">=3.13,<4"
 dependencies = [
   "inspect-ai",
   "mtb",
+  "python-dotenv",
 ]
 
 [dependency-groups]

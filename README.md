@@ -5,9 +5,10 @@ See [one-pager.md](one-pager.md) for the question and plan.
 
 ## Status
 
-The harness runs end to end with Inspect's fake model: a METR public task runs in Docker, METR scores it, and the monitor scores the saved run.
+The harness runs end to end with fake agents: a METR public task runs in Docker, METR scores it, and the monitor scores the saved run.
+That includes the Claude Code path, tested with a fake `claude` binary from `tests/fixtures`.
 No real models have been run yet.
-Next is a 20-run pilot on multi-hour tasks to measure cost and see whether agents cheat often enough to study.
+Next is a small pilot with Claude Code on multi-hour tasks, to see how long runs take and whether cheating shows up.
 
 ## Setup
 
@@ -28,6 +29,29 @@ uv run inspect eval mtb/bridge \
 ```
 
 Swap `mockllm/model` for a real model once the plumbing works.
+
+## Run Claude Code as the agent
+
+The agent is the unmodified Claude Code CLI, installed inside the task container and signed in with your own subscription.
+Inspect starts the container, runs Claude Code as the unprivileged `agent` user, and converts its output into messages for the METR scorer and the monitor.
+
+1. Run `claude setup-token` in your own terminal.
+2. Put the token in `.env` as `CLAUDE_CODE_OAUTH_TOKEN=...`. Git ignores `.env`.
+3. Run a task:
+
+```bash
+uv run python run_claude_code.py \
+  --image-tag registry-1.docker.io/metrevals/public-tasks:cowthello-2.0.2 \
+  --sample-id main --hours 2
+```
+
+Always use `run_claude_code.py` rather than `inspect eval`.
+Inspect's eval log records the token, so the script scrubs every log it writes and fails if any copy is left.
+
+Limits:
+
+- Claude Code needs to reach Anthropic, so only tasks that grant `full_internet` work for now, such as `cowthello` and `clone_game`.
+- Runs count against your plan's usage limits, so run them one at a time.
 
 ## Score an existing run with a monitor
 

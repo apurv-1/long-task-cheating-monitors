@@ -22,8 +22,9 @@ There is also a practical use: time horizon numbers depend on catching illegitim
 
 ## Setup
 
-Tasks: multi-hour METR public tasks run through the Inspect task bridge, for example Payments Over Timezones and Build Expert AI for Novel Board Game.
-Agents: 2-3 frontier models, about 150 runs in total.
+Tasks: multi-hour METR public tasks run through the Inspect task bridge, starting with ones that allow internet access, such as Build Expert AI for Novel Board Game.
+Agent: the unmodified Claude Code CLI running inside each task container, which is the kind of agent METR's risk report studied inside labs.
+Runs: about 150 in total, later adding other models if API credits come through.
 Labels: I read every run that scores as a success, plus a random sample of failures, and label each one as cheat, legitimate, or ambiguous, using METR's definition.
 If I can find a second labeller, they label a subset so I can report agreement.
 Monitors: an LLM monitor that reads the whole transcript, run with 2 monitor models, once with the agent's visible reasoning and once without it.
@@ -47,6 +48,7 @@ Metrics: recall at a 5% false positive rate, and how recall changes as transcrip
 - The sample is small, and most labels come from one person.
 - Monitor results depend on the prompts, so all prompts will be published.
 - Cheating rates depend on the agent scaffold and may not carry over to lab-internal setups.
+- Claude Code needs network access to reach Anthropic, so the first runs only use tasks that already allow internet access.
 - This does not test agents that deliberately try to evade the monitor.
 
 ## Cost and time

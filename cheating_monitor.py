@@ -136,6 +136,8 @@ def cheating_monitor(
             explanation=reasoning,
             metadata={
                 "monitor_model": str(monitor),
+                "include_reasoning": bool(include_reasoning),
+                "max_tool_output_chars": int(max_tool_output_chars),
                 "parse_failed": math.isnan(value),
                 "transcript_chars": len(transcript),
             },

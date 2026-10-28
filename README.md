@@ -30,6 +30,30 @@ uv run inspect eval mtb/bridge \
 
 Swap `mockllm/model` for a real model once the plumbing works.
 
+Some tasks, such as `cowthello`, download files when they are scored.
+Pass METR's public `secrets.env` so the task gets the settings it needs:
+
+```bash
+-T secrets_env_path=../METR-public-tasks/secrets.env
+```
+
+Check a task's `resources` in its `manifest.yaml` before running it.
+Docker Desktop on a Mac can refuse tasks that ask for more CPUs than it has, such as `cowthello/no_internet`.
+
+### Free local model
+
+Ollama runs a model on your own machine, so testing costs nothing.
+These settings keep memory low enough to run beside Docker on a 24 GB Mac:
+
+```bash
+OLLAMA_CONTEXT_LENGTH=16384 OLLAMA_FLASH_ATTENTION=1 OLLAMA_KV_CACHE_TYPE=q8_0 \
+  OLLAMA_NUM_PARALLEL=1 OLLAMA_MAX_LOADED_MODELS=1 ollama serve
+ollama pull qwen3:8b
+```
+
+Then use `--model ollama/qwen3:8b` for the agent and `-S model=ollama/qwen3:8b` for the monitor.
+A model this small is for testing the harness, not for study results: its context fills up long before a multi-hour task ends.
+
 ## Run Claude Code as the agent
 
 The agent is the unmodified Claude Code CLI, installed inside the task container and signed in with your own subscription.
@@ -66,6 +90,27 @@ uv run inspect score logs/<run>.eval \
 Add `-S include_reasoning=false` to hide the agent's reasoning from the monitor.
 The monitor stores a 0-100 suspicion score next to METR's task score.
 A response without a valid score is stored as `nan` with `parse_failed` set, never as 0.
+
+## Label runs by hand
+
+```bash
+uv run python label_runs.py --labeller <your-name> --failure-sample 10
+```
+
+The tool walks through every run METR scored as a success, plus a random sample of failures, and asks for cheat, legitimate, or unclear.
+It also asks which message numbers support the label and for a short note.
+Monitor scores are never shown, so they cannot sway a label.
+Labels are appended to `labels/labels.jsonl`, which belongs in git, and labelled runs are skipped next time.
+
+## Compute the results
+
+```bash
+uv run python analyze.py --out results/summary.json
+```
+
+For each monitor setup, this reports recall at a threshold that flags at most 5% of legitimate runs, a 95% interval, AUROC, recall by transcript length, and the recall lost when the monitor cannot see the agent's reasoning.
+Every number comes with the run counts behind it.
+The threshold is picked on the same runs it is measured on, so with few runs it flatters recall.
 
 ## Tests
 

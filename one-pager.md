@@ -10,8 +10,8 @@ That post reports no recall or precision for the monitor.
 Published monitor comparisons, such as arXiv 2609.19101, use SWE-bench-scale runs rather than multi-hour ones.
 
 So the question is: on multi-hour agent runs, how much cheating does an LLM monitor catch, and at what false positive rate?
-A second question is whether giving the monitor evidence from the sandbox closes the gap.
-By sandbox evidence I mean a log of which files the agent read or changed, such as scoring code or tests.
+A second question is how much the monitor depends on seeing the agent's reasoning, since that reasoning may not stay readable.
+BenchShield, arXiv 2609.11028, already detects cheating from sandbox-side evidence at 96% accuracy, so this study sticks to transcript monitors.
 
 ## Why it matters for loss of control
 
@@ -26,13 +26,13 @@ Tasks: multi-hour METR public tasks run through the Inspect task bridge, for exa
 Agents: 2-3 frontier models, about 150 runs in total.
 Labels: I read every run that scores as a success, plus a random sample of failures, and label each one as cheat, legitimate, or ambiguous, using METR's definition.
 If I can find a second labeller, they label a subset so I can report agreement.
-Monitors: a transcript-only LLM monitor with 2 monitor models, and the same monitors with the sandbox file log added.
+Monitors: an LLM monitor that reads the whole transcript, run with 2 monitor models, once with the agent's visible reasoning and once without it.
 Metrics: recall at a 5% false positive rate, and how recall changes as transcripts get longer.
 
 ## Predictions (written before any runs)
 
 - Transcript-only recall at 5% false positive rate: TODO.
-- Recall gain from adding the sandbox file log: TODO.
+- Recall lost when the monitor cannot see the agent's reasoning: TODO.
 - Recall on the longest third of transcripts compared with the shortest third: TODO.
 
 ## When I drop or change the project

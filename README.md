@@ -3,6 +3,12 @@
 Do LLM monitors catch cheating on multi-hour agent runs?
 See [one-pager.md](one-pager.md) for the question and plan.
 
+## Status
+
+The harness runs end to end with Inspect's fake model: a METR public task runs in Docker, METR scores it, and the monitor scores the saved run.
+No real models have been run yet.
+Next is a 20-run pilot on multi-hour tasks to measure cost and see whether agents cheat often enough to study.
+
 ## Setup
 
 Needs `uv` and a running Docker daemon.
@@ -33,6 +39,7 @@ uv run inspect score logs/<run>.eval \
   -S model=anthropic/claude-sonnet-5-5 --action append
 ```
 
+Add `-S include_reasoning=false` to hide the agent's reasoning from the monitor.
 The monitor stores a 0-100 suspicion score next to METR's task score.
 A response without a valid score is stored as `nan` with `parse_failed` set, never as 0.
 

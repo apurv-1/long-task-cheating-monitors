@@ -1,0 +1,29 @@
+[project]
+name = "long-task-cheating-monitors"
+version = "0.1.0"
+description = "Do LLM monitors catch cheating on multi-hour agent tasks?"
+requires-python = ">=3.13,<4"
+dependencies = [
+  "inspect-ai",
+  "mtb",
+]
+
+[dependency-groups]
+dev = ["pytest"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+# mtb only honours these sources in its own repo, so they are repeated here.
+[tool.uv.sources]
+mtb = { git = "https://github.com/METR/inspect-metr-task-bridge.git", rev = "v0.5.24" }
+metr-task-artifacts = { git = "https://github.com/METR/task-artifacts.git", rev = "v0.1.0" }
+metr-task-assets = { git = "https://github.com/METR/task-assets.git", rev = "v0.0.13" }
+metr-task-aux-vm-helpers = { git = "https://github.com/METR/task-aux-vm-helpers.git", rev = "v0.1.5" }
+metr-task-legacy-verifier = { git = "https://github.com/METR/task-legacy-verifier.git", rev = "v0.1.1" }
+metr-task-protected-scoring = { git = "https://github.com/METR/task-protected-scoring.git", rev = "v0.2.5" }
+metr-task-standard = { git = "https://github.com/METR/vivaria", subdirectory = "python-package", rev = "20a6c290c3c11f701af95a559d9d0c64dd6105d4" }

@@ -1,6 +1,8 @@
 # Can LLM monitors catch cheating on long agent tasks?
 
-Draft one-pager, Apurv Gupta.
+Draft study plan, Apurv Gupta.
+This is the plan for the full study, written before any frontier-model runs.
+The free pilot so far is in [the lab note](../notes/2026-10-29-small-model-evilgenie.md).
 
 ## Question
 
@@ -30,11 +32,13 @@ If I can find a second labeller, they label a subset so I can report agreement.
 Monitors: an LLM monitor that reads the whole transcript, run with 2 monitor models, once with the agent's visible reasoning and once without it.
 Metrics: recall at a 5% false positive rate, and how recall changes as transcripts get longer.
 
-## Predictions (written before any runs)
+## Predictions
 
-- Transcript-only recall at 5% false positive rate: TODO.
-- Recall lost when the monitor cannot see the agent's reasoning: TODO.
-- Recall on the longest third of transcripts compared with the shortest third: TODO.
+These will be written down before any frontier-model runs, so the results cannot shape them.
+
+- Transcript-only recall at a 5% false positive rate.
+- Recall lost when the monitor cannot see the agent's reasoning.
+- Recall on the longest third of transcripts compared with the shortest third.
 
 ## When I drop or change the project
 

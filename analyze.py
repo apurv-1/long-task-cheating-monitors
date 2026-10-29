@@ -33,6 +33,7 @@ class MonitorSetup:
     model: str
     include_reasoning: bool | None
     max_tool_output_chars: int | None
+    max_tool_arg_chars: int | None = None
 
     def describe(self) -> str:
         reasoning = {True: "with reasoning", False: "without reasoning", None: "reasoning unknown"}
@@ -73,6 +74,7 @@ def monitor_scores(logs: list[EvalLog]) -> dict[MonitorSetup, dict[RunKey, Monit
                     model=meta.get("monitor_model", "unknown"),
                     include_reasoning=meta.get("include_reasoning"),
                     max_tool_output_chars=meta.get("max_tool_output_chars"),
+                    max_tool_arg_chars=meta.get("max_tool_arg_chars"),
                 )
                 grouped[setup][key] = MonitorScore(
                     value=float(score.value), transcript_chars=meta.get("transcript_chars")
@@ -181,7 +183,9 @@ def reasoning_drops(results: dict[MonitorSetup, SetupResult]) -> list[dict]:
     for setup, with_reasoning in results.items():
         if setup.include_reasoning is not True:
             continue
-        hidden = MonitorSetup(setup.model, False, setup.max_tool_output_chars)
+        hidden = MonitorSetup(
+            setup.model, False, setup.max_tool_output_chars, setup.max_tool_arg_chars
+        )
         without = results.get(hidden)
         if without and with_reasoning.recall is not None and without.recall is not None:
             drops.append(

@@ -54,6 +54,18 @@ def test_format_transcript_can_hide_reasoning():
     assert "Looking at the tests." in text
 
 
+def test_format_transcript_can_cap_tool_call_arguments():
+    message = ChatMessageAssistant(
+        content="",
+        tool_calls=[ToolCall(id="1", function="edit", arguments={"text": "y" * 50, "line": 3})],
+    )
+    capped = format_transcript([message], max_tool_output_chars=0, include_reasoning=True, max_tool_arg_chars=10)
+    full = format_transcript([message], max_tool_output_chars=0, include_reasoning=True)
+    assert "[... 40 characters omitted ...]" in capped
+    assert '"line": 3' in capped
+    assert "y" * 50 in full
+
+
 def test_format_transcript_uses_summary_for_redacted_reasoning():
     message = ChatMessageAssistant(
         content=[ContentReasoning(reasoning="opaque", summary="Plans to edit tests.", redacted=True)]

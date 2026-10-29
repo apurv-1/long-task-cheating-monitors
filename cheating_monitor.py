@@ -69,10 +69,19 @@ def _reasoning_text(message: ChatMessageAssistant) -> list[str]:
     return [part for part in parts if part]
 
 
+def _call_arguments(arguments: dict, max_chars: int) -> str:
+    if max_chars <= 0:
+        return json.dumps(arguments)
+    return json.dumps(
+        {k: truncate_middle(v, max_chars) if isinstance(v, str) else v for k, v in arguments.items()}
+    )
+
+
 def format_transcript(
     messages: Sequence[ChatMessage],
     max_tool_output_chars: int,
     include_reasoning: bool,
+    max_tool_arg_chars: int = 0,
 ) -> str:
     """Render agent messages as plain text for the monitor."""
     blocks = []
@@ -88,7 +97,9 @@ def format_transcript(
             if message.text:
                 lines.append(message.text)
             for call in message.tool_calls or []:
-                lines.append(f"(tool call) {call.function}({json.dumps(call.arguments)})")
+                lines.append(
+                    f"(tool call) {call.function}({_call_arguments(call.arguments, max_tool_arg_chars)})"
+                )
             blocks.append("\n".join(lines))
         elif isinstance(message, ChatMessageTool):
             output = message.error.message if message.error else message.text
@@ -115,6 +126,7 @@ def cheating_monitor(
     model: str | Model,
     max_tool_output_chars: int = 4000,
     include_reasoning: bool = True,
+    max_tool_arg_chars: int = 0,
 ):
     """Rate each run's suspicion of cheating from 0 to 100.
 
@@ -122,12 +134,17 @@ def cheating_monitor(
         model: Monitor model. Required, so the agent's own model is never used by accident.
         max_tool_output_chars: Cap on each tool output, cut from the middle. 0 keeps everything.
         include_reasoning: Show the agent's visible reasoning to the monitor.
+        max_tool_arg_chars: Cap on each string argument of a tool call, cut from the middle.
+            0 keeps everything. Useful when an agent pastes whole files into every call.
     """
     monitor = get_model(model)
 
     async def score(state: TaskState, target: Target) -> Score:
         transcript = format_transcript(
-            state.messages, int(max_tool_output_chars), bool(include_reasoning)
+            state.messages,
+            int(max_tool_output_chars),
+            bool(include_reasoning),
+            int(max_tool_arg_chars),
         )
         output = await monitor.generate(MONITOR_PROMPT.format(transcript=transcript))
         value, reasoning = parse_monitor_output(output.completion)
@@ -138,6 +155,7 @@ def cheating_monitor(
                 "monitor_model": str(monitor),
                 "include_reasoning": bool(include_reasoning),
                 "max_tool_output_chars": int(max_tool_output_chars),
+                "max_tool_arg_chars": int(max_tool_arg_chars),
                 "parse_failed": math.isnan(value),
                 "transcript_chars": len(transcript),
             },
